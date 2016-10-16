@@ -1,0 +1,8 @@
+<form method="post" action={% url 'update' %}>
+	{% csrf_token %}
+	id:<input type="text" name="id">
+	title:<input type="text" name="title">
+	author:<input type="text" name="author">
+	<input type="submit" value="修改">
+
+</form>
