@@ -1,0 +1,96 @@
+使用多个数据库
+
+1.设置settings.py文件
+
+DATABASES = {
+    'db1': {
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        #'ENGINE': 'django.db.backends.dummy'
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mongodb_db',
+        'USER': 'root',
+        'PASSWORD': 'ct065410',
+        'HOST':'127.0.0.1',
+        'PORT':'3306',
+
+    },
+    'db2':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'app2_db',
+        'USER': 'root',
+        'PASSWORD': 'ct065410',
+        'HOST':'127.0.0.1',
+        'PORT':'3306',
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
+    },
+    'default':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'app2_db',
+        'USER': 'root',
+        'PASSWORD': 'ct065410',
+        'HOST':'127.0.0.1',
+        'PORT':'3306',
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
+    }
+}
+
+#database和app_label的映射
+DATABASES_APPS_MAPPING = {
+    'app2':'db2',
+    'mongodb_django':'db1'
+}
+
+
+2.新建router文件 database_app_router.py
+
+from django.conf import settings
+
+class DatabaseAppsRouter(object):
+        def db_for_read(self, model, **hints):
+                app_label = model._meta.app_label
+                if app_label in settings.DATABASES_APPS_MAPPING:
+                        return settings.DATABASES_APPS_MAPPING[app_label]
+                return None
+        def db_for_write(self, model, **hints):
+                app_label = model._meta.app_label
+                if app_label in settings.DATABASES_APPS_MAPPING:
+                        return settings.DATABASES_APPS_MAPPING[app_label]
+                return None
+        def allow_relation(self, obj1, obj2, **hints):
+                db_obj1 = settings.DATABASES_APPS_MAPPING.get(obj1._meta.app_label)
+                db_obj2 = settings.DATABASES_APPS_MAPPING.get(obj2._meta.app_label)
+                if db_obj1 and db_obj2:
+                        if db_obj1 == db_obj2:
+                                return True
+                        else:
+                                return False
+                return None
+        def db_for_migrate(self, db, app_label, model_name=None, **hints):
+                #import pdb
+                #pdb.set_trace()
+                if db in settings.DATABASES_APPS_MAPPING.values():
+                        return settings.DATABASES_APPS_MAPPING.get(app_label)==db
+                elif app_label in settings.DATABASES_APPS_MAPPING:
+                        return False
+                return None
+
+3.同步数据库
+	manage makemigrations
+	manage migrate 同步default数据库
+	manage migrate --database=db1 同步数据库db1
+	manage migrate --database=db2 同步数据库db2
+
+4.设置model的app_label
+	class Poem(models.Model):
+        	title = models.CharField(max_length=100)
+        	author = models.CharField(max_length=100)
+		class Meta:
+			app_label = 'poem'
+
+
+

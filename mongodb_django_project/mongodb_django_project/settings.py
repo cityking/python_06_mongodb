@@ -1,3 +1,4 @@
+# encoding: utf-8
 """
 Django settings for mongodb_django_project project.
 
@@ -31,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'app2',
     'mongodb_django',
     'mongoengine',
     'django.contrib.admin',
@@ -76,10 +78,39 @@ WSGI_APPLICATION = 'mongodb_django_project.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'db1': {
         #'ENGINE': 'django.db.backends.sqlite3',
         #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-	'ENGINE': 'django.db.backends.dummy'
+	#'ENGINE': 'django.db.backends.dummy'
+   	'ENGINE': 'django.db.backends.mysql', 
+	'NAME': 'mongodb_db',
+	'USER': 'root',
+	'PASSWORD': 'ct065410',
+	'HOST':'127.0.0.1',
+	'PORT':'3306',
+
+    },
+    'db2':{
+   	'ENGINE': 'django.db.backends.mysql', 
+	'NAME': 'app2_db',
+	'USER': 'root',
+	'PASSWORD': 'ct065410',
+	'HOST':'127.0.0.1',
+	'PORT':'3306',
+	#'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
+    },
+    'default':{
+   	'ENGINE': 'django.db.backends.mysql', 
+	'NAME': 'app2_db',
+	'USER': 'root',
+	'PASSWORD': 'ct065410',
+	'HOST':'127.0.0.1',
+	'PORT':'3306',
+	#'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+
     }
 }
 
@@ -131,3 +162,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 from mongoengine import connect
 connect('test',host='127.0.0.1')
+
+#database和app_label的映射
+DATABASES_APPS_MAPPING = {
+    'app2':'db2',
+    'mongodb_django':'db1'
+}
+DATABASE_ROUTERS = ['mongodb_django_project.database_app_router.DatabaseAppsRouter']
+
